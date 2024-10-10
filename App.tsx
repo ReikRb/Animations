@@ -48,6 +48,10 @@ const PosterDescription = styled.Text`
   font-size: 12px;
 `
 
+const DummyContainer = styled.View`
+  width: ${CONSTANTS.SPACER_ITEM_SIZE}px;
+`
+
 function App(): React.JSX.Element {
   const [movies, setMovies] = useState<Movie[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -55,7 +59,7 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getMovies()
-      setMovies(data)
+      setMovies([{key: 'left-spacer'}, ...data, {key: 'right-spacer'}])
       setLoaded(true)
     }
     fetchData()
@@ -84,14 +88,18 @@ function App(): React.JSX.Element {
         scrollEventThrottle={16}  
         renderItem={({item, index}) =>{   
           const inputRange = [
-            (index - 1) * CONSTANTS.ITEM_SIZE,
+            (index - 2) * CONSTANTS.ITEM_SIZE,
+            (index -1) * CONSTANTS.ITEM_SIZE,
             index * CONSTANTS.ITEM_SIZE,
-            (index + 1) * CONSTANTS.ITEM_SIZE,
           ]   
           const translateY = scrollX.interpolate({
             inputRange,
             outputRange: [0, -50, 0]
           })    
+
+          if (!item.originalTitle) {
+            return <DummyContainer/>
+          }
 
           return (
           <PosterContainer>
