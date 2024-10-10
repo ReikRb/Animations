@@ -1,4 +1,9 @@
 {
   "migIndex": 1,
-  "data": []
+  "data": [
+    {
+      "path": "src/assets/fonts/SyneMono-Regular.ttf",
+      "sha1": "15e3ebdd792e477aba6774f021c5b6db5036e41b"
+    }
+  ]
 }

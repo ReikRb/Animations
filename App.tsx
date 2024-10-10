@@ -1,118 +1,96 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from "react";
+import { FlatList, StatusBar } from "react-native";
+import styled from "styled-components/native";
+import { Rating } from "./src/components/Rating";
+import { Genre } from "./src/components/Genre";
+import { getMovies } from "./api";
+import * as CONSTANTS from './src/constants/constants'
+import { fontFamilies } from './src/constants/ui/fonts';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+interface Movie {
+  key: string;
+  originalTitle: string;
+  posterPath: string;
+  voteAverage: number;
+  genres: string[];
+  description: string;
 }
+
+const Container = styled.View`
+  flex:1;
+`
+const PosterContainer = styled.View`
+  width: ${CONSTANTS.ITEM_SIZE}px;
+`
+const Poster = styled.View`
+  margin-horizontal: ${CONSTANTS.SPACING}px;
+  padding: ${CONSTANTS.SPACING*2}px;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 10px;
+`
+
+const PosterImage = styled.Image`
+  width: 100%;
+  height: ${CONSTANTS.ITEM_SIZE * 1.2}px;
+  resize-mode: cover;
+  border-radius: 10px;
+  margin: 0 0 10px 0;
+`
+
+const PosterTitle = styled.Text`
+  font-family: ${fontFamilies.SYNEMONO.normal};
+  font-size: 18px;
+`
+
+const PosterDescription = styled.Text`
+  font-family: ${fontFamilies.SYNEMONO.normal};
+  font-size: 12px;
+`
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [movies, setMovies] = useState<Movie[]>([])
+  const [loaded, setLoaded] = useState(false)
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getMovies()
+      setMovies(data)
+      setLoaded(true)
+    }
+    fetchData()
+  },[])
+  
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Container>
+      <StatusBar />
+      <FlatList
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={CONSTANTS.ITEM_SIZE}
+        decelerationRate={0}
+        data={movies}
+        keyExtractor={item =>item.key}
+        horizontal
+        contentContainerStyle={{
+          alignItems: 'center'
+        }}
+        renderItem={({item}) =>{          
+          return (
+          <PosterContainer>
+            <Poster>
+              <PosterImage source={{uri: item.posterPath}}/>
+              <PosterTitle numberOfLines={1}>{item.originalTitle}</PosterTitle>
+              <Rating rating={item.voteAverage}/>
+              <Genre genres={item.genres}/>
+              <PosterDescription numberOfLines={5}>{item.description}</PosterDescription>
+            </Poster>
+          </PosterContainer>
+          )
+        }}
+        />
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
